@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"name": "pi-bliblia-html",
+			"path": "pi-bliblia-html"
+		},
+		{
+			"name": "pi-biblia-css",
+			"path": "pi-biblia-css"
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "pi-bliblia-html",
+		"liveServer.settings.port": 5501
+	}
+}
