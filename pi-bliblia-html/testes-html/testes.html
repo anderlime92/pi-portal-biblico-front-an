@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Moderno - Background Dinâmico & Glassmorphism</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Google Fonts (Inter) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- 
+      INTEGRAÇÃO WORDPRESS (wp_head):
+      No arquivo header.php do seu tema WordPress, adicione a chamada do wp_head() aqui:
+      <?php wp_head(); ?>
+    -->
+
+    <style>
+        :root {
+            --transition-speed: 1.5s; /* Velocidade da transição de crossfade */
+            --glass-bg: rgba(20, 25, 40, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --glass-blur: 16px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            background-color: #0d0f12; /* Fallback caso imagens falhem */
+        }
+
+        /* BANCO DE IMAGENS DE FUNDO - CAMADAS PARA CROSSFADE SLIDESHOW */
+        #bg-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            overflow: hidden;
+        }
+
+        .bg-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            opacity: 0;
+            transition: opacity var(--transition-speed) ease-in-out, transform 8s ease-out;
+            transform: scale(1.05); /* Efeito sutil de zoom/ken-burns */
+            will-change: opacity, transform;
+        }
+
+        .bg-layer.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* OVERLAY ESCURO PARA GARANTIR CONTRASTE DE LEITURA */
+        #bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(
+                180deg, 
+                rgba(10, 12, 18, 0.65) 0%, 
+                rgba(10, 12, 18, 0.5) 50%, 
+                rgba(10, 12, 18, 0.85) 100%
+            );
+            pointer-events: none;
+        }
+
+        /* COMPONENTES EM GLASSMORPHISM */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+            -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+            border: 1px solid var(--glass-border);
+            border-radius: 1.25rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 255, 255, 0.35);
+            box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        .glass-nav {
+            background: rgba(13, 15, 20, 0.65) !important;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* TEXT SHADOW E ACENTOS */
+        .text-shadow {
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+        }
+
+        .badge-custom {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(5px);
+        }
+
+        /* BOTÕES ESTILIZADOS */
+        .btn-gradient {
+            background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);
+            border: none;
+            color: #fff;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(13, 110, 253, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(13, 110, 253, 0.6);
+            color: #fff;
+        }
+
+        .btn-glass {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+        }
+
+        .btn-glass:hover {
+            background: rgba(255, 255, 255, 0.25);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* RODAPÉ E CONTROLES DO SLIDESHOW */
+        footer {
+            background: rgba(8, 10, 14, 0.85);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .bg-controls-badge {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            font-size: 0.8rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        /* AJUSTES RESPONSIVOS */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.25rem;
+            }
+            .glass-card {
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+    <!-- RECIPIENTE DOS BACKGROUNDS DINÂMICOS -->
+    <div id="bg-container" aria-hidden="true">
+        <div id="bg-layer-1" class="bg-layer active"></div>
+        <div id="bg-layer-2" class="bg-layer"></div>
+    </div>
+
+    <!-- MÁSCARA ESCURA / OVERLAY -->
+    <div id="bg-overlay" aria-hidden="true"></div>
+
+    <!-- CONTROLE MANUAL / INDICADOR DO SLIDESHOW -->
+    <div class="bg-controls-badge badge badge-custom rounded-pill p-2 px-3 d-flex align-items-center gap-2 shadow" id="bgToggleBtn" title="Clique para trocar de fundo manualmente">
+        <i class="bi bi-arrow-repeat text-info" id="bgSpinIcon"></i>
+        <span id="bgStatusText">Fundo Dinâmico</span>
+    </div>
+
+    <!-- BARRA DE NAVEGAÇÃO (BOOTSTRAP 5) -->
+    <!-- 
+      INTEGRAÇÃO WORDPRESS (Navbar):
+      Substitua as opções do menu por: 
+      wp_nav_menu(array('theme_location' => 'primary', 'container_class' => 'collapse navbar-collapse', ...));
+    -->
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark glass-nav fixed-top py-3">
+            <div class="container">
+                <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="#">
+                    <i class="bi bi-layers-half text-info fs-3"></i>
+                    <span class="fs-4">AuraWeb</span>
+                </a>
+                
+                <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarMain">
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0 fw-semibold">
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="#hero">Início</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#recursos">Recursos</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#sobre">Sobre Nós</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#contato">Contato</a>
+                        </li>
+                    </ul>
+                    <div class="d-flex ms-lg-3 gap-2">
+                        <a href="#contato" class="btn btn-gradient px-4 rounded-pill">Explorar</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="flex-grow-1 pt-5 mt-5">
+        
+        <!-- SEÇÃO HERO -->
+        <section id="hero" class="py-5 my-md-5 text-center container">
+            <div class="row justify-content-center py-4">
+                <div class="col-lg-10 col-xl-8">
+                    <span class="badge badge-custom text-white px-3 py-2 rounded-pill mb-3 d-inline-flex align-items-center gap-2 shadow-sm">
+                        <i class="bi bi-stars text-warning"></i> Experiência Imersiva & Fluida
+                    </span>
+                    <h1 class="hero-title display-3 fw-extrabold text-white text-shadow mb-3">
+                        Design Moderno com Imagens Dinâmicas
+                    </h1>
+                    <p class="lead text-light opacity-90 text-shadow mb-4 px-md-4">
+                        Cada recarregamento ou abertura de guia apresenta um visual totalmente renovado e aleatório, alternando em um slideshow automático com transição crossfade.
+                    </p>
+                    <div class="d-flex flex-wrap justify-content-center gap-3">
+                        <a href="#recursos" class="btn btn-gradient btn-lg px-4 rounded-pill">
+                            <i class="bi bi-lightning-charge-fill me-1"></i> Conhecer Recursos
+                        </a>
+                        <button id="btnRandomizeBg" class="btn btn-glass btn-lg px-4 rounded-pill">
+                            <i class="bi bi-shuffle me-1"></i> Sortear Fundo
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SEÇÃO DE CARDS / RECURSOS -->
+        <section id="recursos" class="py-5 container">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold text-white text-shadow">Recursos Principais</h2>
+                <p class="text-light opacity-75">Projetado com compatibilidade total para WordPress e Bootstrap 5</p>
+            </div>
+
+            <div class="row g-4">
+                <!-- CARD 1 -->
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="card glass-card h-100 p-4 border-0 text-white">
+                        <div class="card-body d-flex flex-column">
+                            <div class="feature-icon mb-3 fs-1 text-info">
+                                <i class="bi bi-arrow-repeat"></i>
+                            </div>
+                            <h3 class="card-title h4 fw-bold mb-3">Transição Suave</h3>
+                            <p class="card-text opacity-80 flex-grow-1">
+                                As imagens de fundo realizam crossfade em alta performance utilizando hardware acceleration e troca de camadas do DOM.
+                            </p>
+                            <a href="#" class="text-info text-decoration-none fw-semibold mt-3 d-inline-flex align-items-center gap-1">
+                                Saiba mais <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 2 -->
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="card glass-card h-100 p-4 border-0 text-white">
+                        <div class="card-body d-flex flex-column">
+                            <div class="feature-icon mb-3 fs-1 text-info">
+                                <i class="bi bi-shuffle"></i>
+                            </div>
+                            <h3 class="card-title h4 fw-bold mb-3">Sorteio Inicial</h3>
+                            <p class="card-text opacity-80 flex-grow-1">
+                                Cada atualização de página, abertura de nova janela ou aba sorteia uma imagem de início diferente mantendo a experiência sempre viva.
+                            </p>
+                            <a href="#" class="text-info text-decoration-none fw-semibold mt-3 d-inline-flex align-items-center gap-1">
+                                Saiba mais <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 3 -->
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="card glass-card h-100 p-4 border-0 text-white">
+                        <div class="card-body d-flex flex-column">
+                            <div class="feature-icon mb-3 fs-1 text-info">
+                                <i class="bi bi-wordpress"></i>
+                            </div>
+                            <h3 class="card-title h4 fw-bold mb-3">WordPress Ready</h3>
+                            <p class="card-text opacity-80 flex-grow-1">
+                                Código limpo e desacoplado pronto para receber tags PHP, Custom Fields (ACF) ou dynamic media gallery do WordPress.
+                            </p>
+                            <a href="#" class="text-info text-decoration-none fw-semibold mt-3 d-inline-flex align-items-center gap-1">
+                                Saiba mais <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SEÇÃO INFORMATIVA / SOBRE -->
+        <section id="sobre" class="py-5 container">
+            <div class="row align-items-center glass-card p-4 p-md-5 mx-0">
+                <div class="col-lg-7 mb-4 mb-lg-0 text-white">
+                    <span class="badge bg-info text-dark mb-2 fw-semibold">Integração PHP</span>
+                    <h2 class="fw-bold mb-3">Pronto para virar Tema WordPress</h2>
+                    <p class="opacity-80">
+                        O script embutido aceita dinamicamente vetores de URLs vindas diretamente do banco de dados do seu WordPress via PHP (`wp_localize_script` ou variáveis inline no `footer.php`).
+                    </p>
+                    <ul class="list-unstyled d-flex flex-column gap-2 opacity-90 my-3">
+                        <li class="d-flex align-items-center gap-2">
+                            <i class="bi bi-check-circle-fill text-info"></i> Compatível com ACF (Advanced Custom Fields)
+                        </li>
+                        <li class="d-flex align-items-center gap-2">
+                            <i class="bi bi-check-circle-fill text-info"></i> Totalmente responsivo e mobile-friendly
+                        </li>
+                        <li class="d-flex align-items-center gap-2">
+                            <i class="bi bi-check-circle-fill text-info"></i> Sem dependências externas além do Bootstrap 5
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-lg-5 text-center text-lg-end">
+                    <div class="p-3 bg-dark bg-opacity-50 rounded-4 text-start font-monospace small border border-secondary text-light">
+                        <span class="text-secondary">&lt;!-- Exemplo WordPress PHP --&gt;</span><br>
+                        <span class="text-danger">&lt;?php</span><br>
+                        &nbsp;&nbsp;<span class="text-warning">$backgrounds</span> = get_field(<span class="text-success">'galeria_fundos'</span>);<br>
+                        &nbsp;&nbsp;<span class="text-warning">$urls</span> = array_column(<span class="text-warning">$backgrounds</span>, <span class="text-success">'url'</span>);<br>
+                        <span class="text-danger">?&gt;</span><br>
+                        &lt;script&gt;<br>
+                        &nbsp;&nbsp;const bgArray = <span class="text-danger">&lt;?php</span> echo json_encode(<span class="text-warning">$urls</span>); <span class="text-danger">?&gt;</span>;<br>
+                        &lt;/script&gt;
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- RODAPÉ DA PÁGINA -->
+    <!-- 
+      INTEGRAÇÃO WORDPRESS (wp_footer):
+      Lembre-se de adicionar o <?php wp_footer(); ?> antes do fechamento do </body>
+    -->
+    <footer id="contato" class="py-4 mt-auto text-white">
+        <div class="container text-center text-md-start">
+            <div class="row align-items-center gy-3">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center justify-content-center justify-content-md-start gap-2 mb-1">
+                        <i class="bi bi-layers-half text-info fs-4"></i>
+                        <span class="fw-bold fs-5">AuraWeb</span>
+                    </div>
+                    <p class="small text-light opacity-75 mb-0">
+                        Layout responsivo Bootstrap 5 com imagens de fundo dinâmicas.
+                    </p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <div class="d-flex justify-content-center justify-content-md-end gap-3 mb-2">
+                        <a href="#" class="text-light opacity-75 text-decoration-none fs-5"><i class="bi bi-github"></i></a>
+                        <a href="#" class="text-light opacity-75 text-decoration-none fs-5"><i class="bi bi-twitter-x"></i></a>
+                        <a href="#" class="text-light opacity-75 text-decoration-none fs-5"><i class="bi bi-instagram"></i></a>
+                        <a href="#" class="text-light opacity-75 text-decoration-none fs-5"><i class="bi bi-linkedin"></i></a>
+                    </div>
+                    <p class="small text-light opacity-50 mb-0">
+                        &copy; <span id="yearSpan"></span> AuraWeb. Todos os direitos reservados.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JavaScript Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        /**
+         * GERENCIADOR DE IMAGENS DE FUNDO DINÂMICAS
+         * 1. Inicia em imagem aleatória a cada atualização/recarregamento.
+         * 2. Faz transição automática suave em crossfade.
+         * 3. Totalmente compatível com WordPress (basta alimentar o array `bgImages`).
+         */
+        (function() {
+            "use strict";
+
+            // ARRAY DE IMAGENS DE FUNDO (Pode ser dinâmico via PHP/WordPress)
+            // Em um tema WordPress, você pode substituir esta lista por imagens cadastradas no Customizer/ACF:
+            const bgImages = [
+                "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1920&q=80",
+                "https://images.unsplash.com/photo-1511884642898-4c92249e20b6?auto=format&fit=crop&w=1920&q=80",
+                "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80",
+                "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1920&q=80",
+                "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?auto=format&fit=crop&w=1920&q=80",
+                "https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=1920&q=80"
+            ];
+
+            // TEMPO DE EXIBIÇÃO DE CADA SLIDE (em milissegundos)
+            const SLIDE_INTERVAL = 7000; 
+
+            // ELEMENTOS DO DOM
+            const layer1 = document.getElementById("bg-layer-1");
+            const layer2 = document.getElementById("bg-layer-2");
+            const btnRandomize = document.getElementById("btnRandomizeBg");
+            const bgToggleBtn = document.getElementById("bgToggleBtn");
+            const spinIcon = document.getElementById("bgSpinIcon");
+            const yearSpan = document.getElementById("yearSpan");
+
+            // ESTADO DA APLICAÇÃO
+            let activeLayer = 1; // Camada visível no momento (1 ou 2)
+            let currentIndex = -1;
+            let slideTimer = null;
+
+            // Define o ano atual no footer
+            if (yearSpan) yearSpan.textContent = new Date().getFullYear();
+
+            /**
+             * Pré-carrega uma imagem para evitar travamentos durante a animação
+             */
+            function preloadImage(url, callback) {
+                const img = new Image();
+                img.onload = callback;
+                img.onerror = callback; // Prossegue mesmo se houver erro
+                img.src = url;
+            }
+
+            /**
+             * Executa a transição Crossfade entre as duas camadas de fundo
+             */
+            function changeBackground(index) {
+                // Previne repetição idêntica no sorteio
+                if (index === currentIndex && bgImages.length > 1) {
+                    index = (index + 1) % bgImages.length;
+                }
+
+                currentIndex = index;
+                const nextUrl = bgImages[currentIndex];
+
+                // Pré-carrega antes de animar a opacidade
+                preloadImage(nextUrl, function() {
+                    if (activeLayer === 1) {
+                        // Prepara Layer 2 e desvanece Layer 1
+                        layer2.style.backgroundImage = `url('${nextUrl}')`;
+                        layer2.classList.add("active");
+                        layer1.classList.remove("active");
+                        activeLayer = 2;
+                    } else {
+                        // Prepara Layer 1 e desvanece Layer 2
+                        layer1.style.backgroundImage = `url('${nextUrl}')`;
+                        layer1.classList.add("active");
+                        layer2.classList.remove("active");
+                        activeLayer = 1;
+                    }
+                });
+            }
+
+            /**
+             * Escolhe um índice aleatório (Sorteio inicial ao abrir/recarregar)
+             */
+            function getRandomIndex() {
+                return Math.floor(Math.random() * bgImages.length);
+            }
+
+            /**
+             * Avança para a próxima imagem da fila
+             */
+            function nextBackground() {
+                const nextIndex = (currentIndex + 1) % bgImages.length;
+                changeBackground(nextIndex);
+            }
+
+            /**
+             * Inicia o ciclo do slideshow automático
+             */
+            function startSlideshow() {
+                stopSlideshow();
+                slideTimer = setInterval(nextBackground, SLIDE_INTERVAL);
+            }
+
+            /**
+             * Para o ciclo do slideshow
+             */
+            function stopSlideshow() {
+                if (slideTimer) clearInterval(slideTimer);
+            }
+
+            /**
+             * Inicialização do Script
+             */
+            function init() {
+                if (!bgImages || bgImages.length === 0) return;
+
+                // 1. SORTEIO ALEATÓRIO NO CARREGAMENTO DA PÁGINA / REFRESH
+                const initialRandomIndex = getRandomIndex();
+                
+                // Define a primeira imagem diretamente na primeira camada sem delays
+                layer1.style.backgroundImage = `url('${bgImages[initialRandomIndex]}')`;
+                layer1.classList.add("active");
+                currentIndex = initialRandomIndex;
+
+                // Pré-carrega a próxima imagem para a transição ficar suave
+                const nextIndex = (currentIndex + 1) % bgImages.length;
+                preloadImage(bgImages[nextIndex], function() {});
+
+                // 2. INICIA O SLIDESHOW AUTOMÁTICO
+                startSlideshow();
+
+                // 3. EVENTOS DE INTERAÇÃO DO USUÁRIO
+                if (btnRandomize) {
+                    btnRandomize.addEventListener("click", function() {
+                        if (spinIcon) spinIcon.classList.add("spin-anim");
+                        changeBackground(getRandomIndex());
+                        startSlideshow(); // Reinicia o timer ao clicar
+                    });
+                }
+
+                if (bgToggleBtn) {
+                    bgToggleBtn.addEventListener("click", function() {
+                        changeBackground(getRandomIndex());
+                        startSlideshow();
+                    });
+                }
+            }
+
+            // Inicia quando o DOM estiver pronto
+            document.addEventListener("DOMContentLoaded", init);
+
+        })();
+    </script>
+</body>
+</html>
